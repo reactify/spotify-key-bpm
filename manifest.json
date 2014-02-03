@@ -1,0 +1,25 @@
+{
+  "AppName": {
+    "en": "Key & BPM Browser"
+  },
+  "BundleIdentifier": "key-bpm",
+  "AppDescription": {
+    "en": "Browse a playlist by key and BPM"
+  },
+  "AcceptedLinkTypes": [
+    "playlist"
+  ],
+  "BundleType": "Application",
+  "BundleVersion": "0.2",
+  "Dependencies": {
+    "api": "1.38.0",
+    "views": "1.18.1"
+  },
+  "SupportedLanguages": [
+    "en"
+  ],
+  "RequiredPermissions": [
+        "http://*.echonest.com"
+  ],
+  "VendorIdentifier": "com.spotify"
+}

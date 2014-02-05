@@ -7,7 +7,7 @@ Hacked together at MIDEM Music Hack Day 2014. Lots of dodgy code in here...
  1. Sign up for a [developer account on Spotify](https://developer.spotify.com/technologies/apps/#developer) by logging in and agreeing to the [terms of use](https://developer.spotify.com/technologies/apps/terms-of-use/).
  2. Create the Spotify folder if it doesn't exist already: `~/Spotify` (Mac OS X and Linux) or `My Documents\Spotify` (Windows).
  3. Open the Spotify folder.
- 4. Run `git clone git://github.com/spotify/apps-tutorial.git api-tutorial`.
+ 4. Run `git clone git://github.com/reactify/spotify-key-bpm`.
  5. Download the [latest version of Spotify](http://spotify.com/download).
  6. Open Spotify and type "spotify:app:key-bpm" in the search bar (restart Spotify completely in case it doesn't find the App at first).
 

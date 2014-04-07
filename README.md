@@ -1,3 +1,8 @@
+### DISCLAIMER
+Since writing this code I have noticed a couple of pretty bad bugs in here which make the wrong Keys/BPMs appear next to the tracks. If you are a programmer who isn't afraid of trying to fix a few things, please do so (and do a Pull Request if you feel like it!), as I believe this repo still does give you a bit of a headstart in terms of formatting and all of the EchoNest API call stuff...
+
+If you are not a programmer and are expecting something finished and working, I'm afraid this is not it...
+
 # Key and BPM browser for Spotify
 
 Hacked together at MIDEM Music Hack Day 2014. Lots of dodgy code in here...
@@ -10,8 +15,6 @@ Hacked together at MIDEM Music Hack Day 2014. Lots of dodgy code in here...
  4. Run `git clone git://github.com/reactify/spotify-key-bpm`.
  5. Download the [latest version of Spotify](http://spotify.com/download).
  6. Open Spotify and type "spotify:app:key-bpm" in the search bar (restart Spotify completely in case it doesn't find the App at first).
-
-[yuli@reactifymusic.com](yuli@reactifymusic.com) if you have any questions.
 
 ## License
 

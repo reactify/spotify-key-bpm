@@ -97,16 +97,17 @@ require([
                 if(undefined !== uri) {
                     // Change format of the Spotify URI to comply with EchoNest API
                     var formattedURI = uri.replace('spotify', 'spotify-WW');
-                    if (i>=offset && i<4+offset) {
+                    // if (i>=offset && i<4+offset) {
                         // Add the URI to our current batch
                         uriBatch.push(formattedURI);
-                    }
+                    // }
                 }
             });
             // Great - now we have the four Spotify URIs that we want to get the Key/BPM info for
 
             // Construct the URL request for EchoNest. There's definitely a better way to do this using a base URL with parameters...
-            var enURL = enBase+'api_key='+enAPIkey+'&format=json&track_id='+uriBatch[0]+'&track_id='+uriBatch[1]+'&track_id='+uriBatch[2]+'&track_id='+uriBatch[3]+'&bucket=audio_summary';
+            // var enURL = enBase+'api_key='+enAPIkey+'&format=json&track_id='+uriBatch[0]+'&track_id='+uriBatch[1]+'&track_id='+uriBatch[2]+'&track_id='+uriBatch[3]+'&bucket=audio_summary';
+            var enURL = enBase+'api_key='+enAPIkey+'&format=json&track_id='+uriBatch[offset]+'&bucket=audio_summary';
             var batchBPM = [];
             var batchKey =[];
 
@@ -114,32 +115,36 @@ require([
             
             $.getJSON(
                 enURL, function (data) {
-                    // console.log(data);
+                    console.log(data);
                     $.each(data, function(index, element) {
-                        for (var k = 0; k<4; k++) {
-                            if (undefined !== element.songs[k]) {
+                        // for (var k = 0; k<1; k++) {
+                            if (element.status.code == 0) {
                                 // console.log('pushing key and bpm for item '+k);
                                 // Put the key and BPM info into our arrays
-                                batchKey.push(element.songs[k].audio_summary.key);
-                                batchBPM.push(element.songs[k].audio_summary.tempo);
+                                batchKey.push(element.songs[0].audio_summary.key);
+                                batchBPM.push(element.songs[0].audio_summary.tempo);
                             }else{
                                 // If this code runs, it introduces a bug
                                 // We don't increment the place in the array that the subsequent BPMs and keys need to go into so they're no longer in sync
                                 batchKey.push('!');
                                 batchBPM.push('!');
                             }
-                        }
+                        // }
                     });
                     // Now we've got our data, replace the column contents with it
                     $('.sp-list-item').each(function(i, trackItem) {
-                        if (i>=offset && i<4+offset) {
-                            // console.log('replace '+i);
+                        if (i>=offset && i<1+offset) {
+                            console.log('replace '+i);
                             $(this).find(".sp-list-cell-popularity").each(function (l) {
                                 // console.log($(this));
+                                // TO-DO:
+                                // Match the SP URIs instead of simply using index
                                 $(this).html(batchBPM[i-offset]);
                             });
                             $(this).find(".sp-list-cell-share").each(function (l) {
-                                // console.log($(this));
+                                // console.log($(this));s
+                                // TO-DO:
+                                // Match the SP URIs instead of simply using index
                                 $(this).html(convertKey(batchKey[i-offset]));
                             });
                         }
@@ -149,15 +154,15 @@ require([
 
                     // Run the whole thing again until we run out of songs
                     if (offset <= playlistLength){
-                        printAlbums(4, offset+4);
-                        console.log('next offset = '+offset+4);
+                        printAlbums(1, offset+1);
+                        // console.log('next offset = '+offset+4);
                     }else{
-                        console.log('reached end of list');
+                        // console.log('reached end of list');
                     }
                 });
         }
 
         // Run for the first time after having loaded the playlists
-        setTimeout(function(){ printAlbums(4, 0); }, 1000);
+        setTimeout(function(){ printAlbums(1, 0); }, 1000);
     }
 });

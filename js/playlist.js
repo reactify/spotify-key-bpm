@@ -3,6 +3,8 @@ require([
     '$views/list#List'
 ], function(models, List) {
 
+    var currentKey = 19;
+
     var playlistURI;
 
     // Handle drops
@@ -44,6 +46,13 @@ require([
 
         this.appendChild(successMessage);
     }, false);
+    
+    function reduceFontSize() {
+      var selects = document.getElementsByTagName("sp-list-item");
+      for(var i =0, il = selects.length;i<il;i++){
+         selects[i].style.fontSize = "5px";
+      }
+    }
 
     function buildPlaylist() {
         // Most of this code is taken from the tutorial code...
@@ -74,6 +83,18 @@ require([
             }
         }
 
+        function compareToCurrentKey (key, mode) {
+            var keyAndMode = key+(mode+12);
+            console.log("Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            if (keyAndMode == currentKey || keyAndMode == ((currentKey+7)%12) || keyAndMode == ((currentKey-7)%12)) {
+                console.log("IN KEY OR ADJACENT! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            }else if (keyAndMode < 12 && keyAndMode == (currentKey+3)) {
+                console.log("RELATIVE MAJOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            }else if (keyAndMode >= 12 && keyAndMode == (currentKey-3)) {
+                ("RELATIVE MINOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            }
+        }
+
         // Wait for the list to have loaded and then replace the column headings with our own text
         setTimeout(function replaceNames() {
             $("th.sp-list-cell-popularity").replaceWith("<th class=\"sp-list-heading sp-list-cell-bpm\">BPM</th>");
@@ -85,21 +106,21 @@ require([
         function printAlbums(number, offset) {
             var playlistLength = $('.sp-list-table-body').find(".sp-list-item").size();
             // EchoNest only allows you to request info for 4 or 5 songs at a time, so we need to do this in batches
-            console.log('Printing '+number+' albums with offset = '+offset);
+            // console.log('Printing '+number+' albums with offset = '+offset);
             var uriBatch = [];
             var track;
             var artist;
             var i = 0;
-            console.log('playlist length = '+playlistLength);
+            // console.log('playlist length = '+playlistLength);
             $('.sp-list-item').each(function(i, trackItem) {
                 // Get uri of song
                 var uri = trackItem.getAttribute("data-uri");
                 if(undefined !== uri) {
                     // Change format of the Spotify URI to comply with EchoNest API
-                    var formattedURI = uri.replace('spotify', 'spotify-WW');
+                    // var formattedURI = uri.replace('spotify', 'spotify-WW');
                     // if (i>=offset && i<4+offset) {
                         // Add the URI to our current batch
-                        uriBatch.push(formattedURI);
+                        uriBatch.push(uri);
                     // }
                 }
             });
@@ -110,8 +131,9 @@ require([
             var enURL = enBase+'api_key='+enAPIkey+'&format=json&track_id='+uriBatch[offset]+'&bucket=audio_summary';
             var batchBPM = [];
             var batchKey =[];
+            var batchMode =[];
 
-            console.log('enURL = '+enURL);
+            console.log('enURL = '+enURL, enAPIkey);
             
             $.getJSON(
                 enURL, function (data) {
@@ -122,11 +144,14 @@ require([
                                 // console.log('pushing key and bpm for item '+k);
                                 // Put the key and BPM info into our arrays
                                 batchKey.push(element.songs[0].audio_summary.key);
+                                batchMode.push(element.songs[0].audio_summary.mode);
                                 batchBPM.push(element.songs[0].audio_summary.tempo);
+                                compareToCurrentKey(element.songs[0].audio_summary.key, element.songs[0].audio_summary.mode);
                             }else{
                                 // If this code runs, it introduces a bug
                                 // We don't increment the place in the array that the subsequent BPMs and keys need to go into so they're no longer in sync
                                 batchKey.push('!');
+                                batchMode.push('!');
                                 batchBPM.push('!');
                             }
                         // }
@@ -134,23 +159,27 @@ require([
                     // Now we've got our data, replace the column contents with it
                     $('.sp-list-item').each(function(i, trackItem) {
                         if (i>=offset && i<1+offset) {
-                            console.log('replace '+i);
+                            // console.log('replace '+i);
                             $(this).find(".sp-list-cell-popularity").each(function (l) {
-                                // console.log($(this));
-                                // TO-DO:
-                                // Match the SP URIs instead of simply using index
+
+                                console.log("l = "+this.style.getPropertyCSSValue('color'));
                                 $(this).html(batchBPM[i-offset]);
                             });
                             $(this).find(".sp-list-cell-share").each(function (l) {
-                                // console.log($(this));s
-                                // TO-DO:
-                                // Match the SP URIs instead of simply using index
-                                $(this).html(convertKey(batchKey[i-offset]));
+                                if (batchMode[i-offset]) {
+                                    $(this).html(convertKey(batchKey[i-offset])+"m");
+                                    console.log('this = '+$(this).html);
+                                    // $(this).style.fontSize = "5px";
+                                }else{
+                                    $(this).html(convertKey(batchKey[i-offset]));
+                                    // $(this).style.fontSize = "5px";
+                                    console.log('this = '+$(this).style);
+                                }
                             });
                         }
                     });
-                    console.log('done');
-                    console.log('next number = '+(playlistLength-(number+offset)));
+                    // console.log('done');
+                    // console.log('next number = '+(playlistLength-(number+offset)));
 
                     // Run the whole thing again until we run out of songs
                     if (offset <= playlistLength){
@@ -164,5 +193,6 @@ require([
 
         // Run for the first time after having loaded the playlists
         setTimeout(function(){ printAlbums(1, 0); }, 1000);
+        reduceFontSize();
     }
 });

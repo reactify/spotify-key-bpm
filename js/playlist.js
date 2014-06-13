@@ -88,10 +88,15 @@ require([
             console.log("Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
             if (keyAndMode == currentKey || keyAndMode == ((currentKey+7)%12) || keyAndMode == ((currentKey-7)%12)) {
                 console.log("IN KEY OR ADJACENT! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+                return 1
             }else if (keyAndMode < 12 && keyAndMode == (currentKey+3)) {
                 console.log("RELATIVE MAJOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+                return 2
             }else if (keyAndMode >= 12 && keyAndMode == (currentKey-3)) {
                 ("RELATIVE MINOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+                return 3
+            }else {
+                return 0
             }
         }
 
@@ -132,6 +137,7 @@ require([
             var batchBPM = [];
             var batchKey =[];
             var batchMode =[];
+            var batchKeyMatch =[];
 
             console.log('enURL = '+enURL, enAPIkey);
             
@@ -145,11 +151,9 @@ require([
                                 // Put the key and BPM info into our arrays
                                 batchKey.push(element.songs[0].audio_summary.key);
                                 batchMode.push(element.songs[0].audio_summary.mode);
-                                batchBPM.push(element.songs[0].audio_summary.tempo);
-                                compareToCurrentKey(element.songs[0].audio_summary.key, element.songs[0].audio_summary.mode);
+                                batchBPM.push(parseInt(element.songs[0].audio_summary.tempo));
+                                batchKeyMatch.push(compareToCurrentKey(element.songs[0].audio_summary.key, element.songs[0].audio_summary.mode));
                             }else{
-                                // If this code runs, it introduces a bug
-                                // We don't increment the place in the array that the subsequent BPMs and keys need to go into so they're no longer in sync
                                 batchKey.push('!');
                                 batchMode.push('!');
                                 batchBPM.push('!');
@@ -159,21 +163,30 @@ require([
                     // Now we've got our data, replace the column contents with it
                     $('.sp-list-item').each(function(i, trackItem) {
                         if (i>=offset && i<1+offset) {
+                            var keyMatchTextColor;
+                            var keyMatchBgColor;
+                            if (batchKeyMatch[i-offset] == 0) {
+                                keyMatchTextColor = "black";
+                                keyMatchBgColor = "inherit";
+                            }else if (batchKeyMatch[i-offset] == 1) {
+                                keyMatchTextColor = "white";
+                                keyMatchBgColor = "green";
+                            }else if (batchKeyMatch[i-offset] == 2) {
+                                keyMatchTextColor = "white";
+                                keyMatchBgColor = "orange";
+                            }else if (batchKeyMatch[i-offset] == 3) {
+                                keyMatchTextColor = "white";
+                                keyMatchBgColor = "orange";
+                            }
                             // console.log('replace '+i);
                             $(this).find(".sp-list-cell-popularity").each(function (l) {
-
-                                console.log("l = "+this.style.getPropertyCSSValue('color'));
                                 $(this).html(batchBPM[i-offset]);
                             });
                             $(this).find(".sp-list-cell-share").each(function (l) {
                                 if (batchMode[i-offset]) {
-                                    $(this).html(convertKey(batchKey[i-offset])+"m");
-                                    console.log('this = '+$(this).html);
-                                    // $(this).style.fontSize = "5px";
+                                    $(this).html("<div style='background-color:"+keyMatchBgColor+"; color:"+keyMatchTextColor+"; font-weight:bold;'>"+convertKey(batchKey[i-offset])+"m</div>");
                                 }else{
-                                    $(this).html(convertKey(batchKey[i-offset]));
-                                    // $(this).style.fontSize = "5px";
-                                    console.log('this = '+$(this).style);
+                                    $(this).html("<div style='background-color:"+keyMatchBgColor+"; color:"+keyMatchTextColor+"; font-weight:bold;'>"+convertKey(batchKey[i-offset])+"</div>");
                                 }
                             });
                         }

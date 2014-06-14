@@ -1,10 +1,9 @@
+var currentKey;
+
 require([
     '$api/models',
     '$views/list#List'
 ], function(models, List) {
-
-    var currentKey = 19;
-
     var playlistURI;
 
     // Handle drops
@@ -84,17 +83,24 @@ require([
         }
 
         function compareToCurrentKey (key, mode) {
-            var keyAndMode = key+(mode+12);
-            console.log("Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
-            if (keyAndMode == currentKey || keyAndMode == ((currentKey+7)%12) || keyAndMode == ((currentKey-7)%12)) {
-                console.log("IN KEY OR ADJACENT! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            var keyAndMode = key+((mode ? 0 : 1)*12);
+            currentKey = parseInt(currentKey, 10);
+            console.log("Key: "+key+", Mode: "+mode+", Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            if (keyAndMode == currentKey) {
+                console.log("IN KEY! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
                 return 1
-            }else if (keyAndMode < 12 && keyAndMode == (currentKey+3)) {
-                console.log("RELATIVE MAJOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            }else if (keyAndMode == ((currentKey+7)%12)) {
+                console.log("UP A FIFTH! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
                 return 2
-            }else if (keyAndMode >= 12 && keyAndMode == (currentKey-3)) {
-                ("RELATIVE MINOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+            }else if (keyAndMode == ((currentKey+5)%12)) {
+                console.log("DOWN A FIFTH! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
                 return 3
+            }else if (keyAndMode < 12 && keyAndMode == (currentKey-15)) {
+                console.log("RELATIVE MAJOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+                return 4
+            }else if (keyAndMode >= 12 && keyAndMode == (currentKey+15)) {
+                ("RELATIVE MAJOR! Key and Mode: "+keyAndMode+", Current Key: "+currentKey);
+                return 5
             }else {
                 return 0
             }
@@ -129,7 +135,6 @@ require([
                     // }
                 }
             });
-            // Great - now we have the four Spotify URIs that we want to get the Key/BPM info for
 
             // Construct the URL request for EchoNest. There's definitely a better way to do this using a base URL with parameters...
             // var enURL = enBase+'api_key='+enAPIkey+'&format=json&track_id='+uriBatch[0]+'&track_id='+uriBatch[1]+'&track_id='+uriBatch[2]+'&track_id='+uriBatch[3]+'&bucket=audio_summary';
@@ -153,10 +158,12 @@ require([
                                 batchMode.push(element.songs[0].audio_summary.mode);
                                 batchBPM.push(parseInt(element.songs[0].audio_summary.tempo));
                                 batchKeyMatch.push(compareToCurrentKey(element.songs[0].audio_summary.key, element.songs[0].audio_summary.mode));
+                                console.log(compareToCurrentKey(element.songs[0].audio_summary.key, element.songs[0].audio_summary.mode));
                             }else{
                                 batchKey.push('!');
                                 batchMode.push('!');
                                 batchBPM.push('!');
+                                batchKeyMatch.push('!');
                             }
                         // }
                     });
@@ -166,17 +173,29 @@ require([
                             var keyMatchTextColor;
                             var keyMatchBgColor;
                             if (batchKeyMatch[i-offset] == 0) {
+                                // NO MATCH
                                 keyMatchTextColor = "black";
                                 keyMatchBgColor = "inherit";
                             }else if (batchKeyMatch[i-offset] == 1) {
+                                // IN KEY
                                 keyMatchTextColor = "white";
                                 keyMatchBgColor = "green";
                             }else if (batchKeyMatch[i-offset] == 2) {
+                                // UP A FIFTH
                                 keyMatchTextColor = "white";
                                 keyMatchBgColor = "orange";
                             }else if (batchKeyMatch[i-offset] == 3) {
+                                // DOWN A FIFTH
                                 keyMatchTextColor = "white";
-                                keyMatchBgColor = "orange";
+                                keyMatchBgColor = "#808000";
+                            }else if (batchKeyMatch[i-offset] == 4) {
+                                // RELATIVE MAJOR
+                                keyMatchTextColor = "white";
+                                keyMatchBgColor = "#008080";
+                            }else if (batchKeyMatch[i-offset] == 5) {
+                                // RELATIVE MINOR
+                                keyMatchTextColor = "white";
+                                keyMatchBgColor = "#008080";
                             }
                             // console.log('replace '+i);
                             $(this).find(".sp-list-cell-popularity").each(function (l) {
@@ -191,8 +210,6 @@ require([
                             });
                         }
                     });
-                    // console.log('done');
-                    // console.log('next number = '+(playlistLength-(number+offset)));
 
                     // Run the whole thing again until we run out of songs
                     if (offset <= playlistLength){
@@ -209,3 +226,8 @@ require([
         reduceFontSize();
     }
 });
+
+function calculateHarmony(key) {
+    console.log("setting key to "+key);
+    currentKey = key;
+}

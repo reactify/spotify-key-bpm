@@ -15,8 +15,37 @@
 				<h1>Spotify + EchoNest = Awesome</h1>
 
 				<div id="drop-box">Drop a playlist here</div>
-
-				<div class="html-snippet" data-container="html">
+				<div>
+					<div class="current-key">Current key = </div>
+					<select id="key-drop-down" name="key" onchange="calculateHarmony(value)">
+						<option value="12">C</option>
+						<option value="13">C#</option>
+						<option value="14">D</option>
+						<option value="15">D#</option>
+						<option value="16">E</option>
+						<option value="17">F</option>
+						<option value="18">F#</option>
+						<option value="19">G</option>
+						<option value="20">G#</option>
+						<option value="21">A</option>
+						<option value="22">A#</option>
+						<option value="23">B</option>
+						<option value="0">Cm</option>
+						<option value="1">C#m</option>
+						<option value="2">Dm</option>
+						<option value="3">D#m</option>
+						<option value="4">Em</option>
+						<option value="5">Fm</option>
+						<option value="6">F#m</option>
+						<option value="7">Gm</option>
+						<option value="8">G#m</option>
+						<option value="9">Am</option>
+						<option value="10">A#m</option>
+						<option value="11">Bm</option>
+					</select>
+				</div>
+			</br>
+				<div class="html-snippet" data-container="html" style="clear:both;">
 					<div id="playlist-player"></div>
 				</div>
 </div>
